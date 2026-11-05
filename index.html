@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPANDA | Command Center</title>
+    
+    <!-- Load Leaflet.js CSS (Free Map Library) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        /* CSS: The Paint & Design */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Dark stealth theme */
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 { margin-top: 20px; font-weight: 300; letter-spacing: 2px; }
+
+        /* The Map Container */
+        #map {
+            height: 60vh;
+            width: 90%;
+            margin: 20px auto;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* The Emergency Alert Banner (Hidden by default) */
+        #alert-banner {
+            display: none; /* Invisible until triggered */
+            background-color: #ff0000;
+            color: white;
+            padding: 15px;
+            width: 85%;
+            margin: 0 auto;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+            animation: blinker 1s linear infinite; /* Blinking effect */
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0.3; }
+        }
+
+        /* Developer Test Button */
+        .test-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .test-btn:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <h1>🌐 SPANDA TELEMETRY DASHBOARD</h1>
+    
+    <!-- Developer button to test the UI without hardware -->
+    <button class="test-btn" onclick="testEmergency()">Simulate Hardware Trigger</button>
+
+    <div id="alert-banner">
+        🚨 SOS TRIGGERED 🚨 <br>
+        <span id="coords-text" style="font-size: 16px; font-weight: normal;">Locating...</span>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Load Leaflet.js JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // JavaScript: The Muscle & Logic
+
+        // 1. Initialize the map (Default view over India)
+        var map = L.map('map').setView([20.5937, 78.9629], 5);
+
+        // 2. Load the free OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var emergencyMarker;
+
+        // 3. The Function to trigger the visual alert
+        function triggerEmergency(lat, lng) {
+            // Show the blinking red banner
+            document.getElementById('alert-banner').style.display = 'block';
+            
+            // Update the text with actual coordinates
+            document.getElementById('coords-text').innerText = "Live Location: " + lat + "° N, " + lng + "° E";
+
+            // Fly the map to the specific coordinates with a cool animation
+            map.flyTo([lat, lng], 16);
+
+            // Remove old marker if it exists, and drop a new red marker
+            if(emergencyMarker) { map.removeLayer(emergencyMarker); }
+            
+            var redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            emergencyMarker = L.marker([lat, lng], {icon: redIcon}).addTo(map)
+                .bindPopup("<b>SPANDA Beacon Activated!</b>").openPopup();
+        }
+
+        // 4. Test Function (Simulates the SIM800L sending coordinates)
+        function testEmergency() {
+            // Simulating a coordinate drop in Dehradun
+            triggerEmergency(30.3165, 78.0322);
+        }
+    </script>
+</body>
+</html>
