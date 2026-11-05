@@ -3,16 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPANDA | Command Center</title>
+    <title>STEALTH | Command Center</title>
     
-    <!-- Load Leaflet.js CSS -->
+    <!-- Load Leaflet.js CSS (Free Map Library) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        /* Custom Dark Mode Filter for standard map tiles */
-.leaflet-tile {
-    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-}
         /* CSS: The Paint & Design */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -35,9 +31,14 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
         }
 
+        /* Custom Dark Mode Filter for standard free map tiles */
+        .leaflet-tile {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
         /* The Emergency Alert Banner */
         #alert-banner {
-            display: none;
+            display: none; /* Invisible until triggered */
             background-color: #ff0000;
             color: white;
             padding: 15px;
@@ -64,22 +65,6 @@
             border: 2px solid #ffffff; /* White ring to make it pop */
             box-shadow: 0 0 10px rgba(255, 0, 0, 1);
             animation: dot-blink 0.6s infinite alternate; /* Fast blink effect */
-        }
-
-        @keyframes dot-blink {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(1.5); }
-        }
-
-/* CONTINUOUSLY BLINKING MAP DOT CSS */
-        .blinking-dot {
-            background-color: #ff0000;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid #ffffff;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 1);
-            animation: dot-blink 0.6s infinite alternate;
             margin: 0;
             padding: 0;
             display: block;
@@ -89,9 +74,6 @@
             0% { opacity: 1; transform: scale(1); }
             100% { opacity: 0; transform: scale(1.5); }
         }
-
-
-        
 
         /* Developer Test Button */
         .test-btn {
@@ -109,7 +91,8 @@
 </head>
 <body>
 
-    <h1>🌐 SPANDA TELEMETRY DASHBOARD</h1>
+    <!-- Updated Title -->
+    <h1>🌐 STEALTH TELEMETRY DASHBOARD</h1>
     
     <button class="test-btn" onclick="testEmergency()">Simulate Hardware Trigger</button>
 
@@ -124,62 +107,51 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
+        // JavaScript: The Muscle & Logic
+
         // 1. Initialize the map (Default view over India)
         var map = L.map('map').setView([20.5937, 78.9629], 5);
 
-       // Load standard OpenStreetMap tiles (Free, no API keys)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-}).addTo(map);
+        // 2. Load standard OpenStreetMap tiles (Safe, free, no API keys)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
         var emergencyMarker;
 
         // 3. The Function to trigger the visual alert
         function triggerEmergency(lat, lng) {
+            // Show the blinking red banner
             document.getElementById('alert-banner').style.display = 'block';
-            document.getElementById('coords-text').innerText = "Live Location: " + lat + "° N, " + lng + "° E";
             
+            // Update the text with actual coordinates
+            document.getElementById('coords-text').innerText = "Live Location: " + lat + "° N, " + lng + "° E";
+
+            // Fly the map to the specific coordinates
             map.flyTo([lat, lng], 16);
 
+            // Remove old marker if it exists
             if(emergencyMarker) { map.removeLayer(emergencyMarker); }
             
-            // 4. Attach the blinking CSS class to a custom map icon
+            // Create the completely aligned blinking icon
             var blinkingIcon = L.divIcon({
-                className: 'blinking-dot',
-                iconSize: [16, 16],
-                iconAnchor: [8, 8], // Centers the dot exactly on the coordinates
-                popupAnchor: [0, -10]
-            });
-
-            // 5. Drop the blinking marker on the map
-            emergencyMarker = L.marker([lat, lng], {icon: blinkingIcon}).addTo(map)
-                .bindPopup("<b>🎯 SPANDA Beacon Pinpointed!</b>").openPopup();
-        }
-
-        // Test Function (Simulates the SIM800L sending coordinates)
-        function testEmergency() {
-            function triggerEmergency(lat, lng) {
-            document.getElementById('alert-banner').style.display = 'block';
-            document.getElementById('coords-text').innerText = "Live Location: " + lat + "° N, " + lng + "° E";
-            
-            map.flyTo([lat, lng], 16);
-
-            if(emergencyMarker) { map.removeLayer(emergencyMarker); }
-            
-            // Use an empty className and custom html to perfectly align the dot
-            var blinkingIcon = L.divIcon({
-                className: '', 
+                className: '', // Leave empty to prevent Leaflet from adding a white background
                 html: '<div class="blinking-dot"></div>',
                 iconSize: [16, 16],
-                iconAnchor: [8, 8], // Perfectly centers the 16px dot
-                popupAnchor: [0, -10] // Hovers the popup just above the dot
+                iconAnchor: [8, 8], // Perfectly centers the 16px dot on the exact lat/long
+                popupAnchor: [0, -10] // Hovers the popup exactly above the dot
             });
 
             // Drop the marker and update the popup text to STEALTH
             emergencyMarker = L.marker([lat, lng], {icon: blinkingIcon}).addTo(map)
                 .bindPopup("<b>🎯 STEALTH Beacon Pinpointed!</b>").openPopup();
         }
+
+        // 4. Test Function (Simulates the SIM800L sending coordinates)
+        function testEmergency() {
+            // Triggering coordinates for Dehradun
+            triggerEmergency(30.3165, 78.0322);
         }
     </script>
 </body>
