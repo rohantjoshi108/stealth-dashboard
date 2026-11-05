@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
+        /* Custom Dark Mode Filter for standard map tiles */
+.leaflet-tile {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
         /* CSS: The Paint & Design */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -101,11 +105,11 @@
         // 1. Initialize the map (Default view over India)
         var map = L.map('map').setView([20.5937, 78.9629], 5);
 
-        // 2. Load CartoDB Dark Matter tiles (Dark Stealth Theme)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors, © CARTO'
-        }).addTo(map);
+       // Load standard OpenStreetMap tiles (Free, no API keys)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+}).addTo(map);
 
         var emergencyMarker;
 
