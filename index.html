@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPANDA | Command Center</title>
     
-    <!-- Load Leaflet.js CSS (Free Map Library) -->
+    <!-- Load Leaflet.js CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
@@ -31,9 +31,9 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
         }
 
-        /* The Emergency Alert Banner (Hidden by default) */
+        /* The Emergency Alert Banner */
         #alert-banner {
-            display: none; /* Invisible until triggered */
+            display: none;
             background-color: #ff0000;
             color: white;
             padding: 15px;
@@ -44,11 +44,27 @@
             font-weight: bold;
             text-transform: uppercase;
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
-            animation: blinker 1s linear infinite; /* Blinking effect */
+            animation: banner-blink 1s linear infinite; 
         }
 
-        @keyframes blinker {
+        @keyframes banner-blink {
             50% { opacity: 0.3; }
+        }
+
+        /* CONTINUOUSLY BLINKING MAP DOT CSS */
+        .blinking-dot {
+            background-color: #ff0000;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #ffffff; /* White ring to make it pop */
+            box-shadow: 0 0 10px rgba(255, 0, 0, 1);
+            animation: dot-blink 0.6s infinite alternate; /* Fast blink effect */
+        }
+
+        @keyframes dot-blink {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
         }
 
         /* Developer Test Button */
@@ -69,7 +85,6 @@
 
     <h1>🌐 SPANDA TELEMETRY DASHBOARD</h1>
     
-    <!-- Developer button to test the UI without hardware -->
     <button class="test-btn" onclick="testEmergency()">Simulate Hardware Trigger</button>
 
     <div id="alert-banner">
@@ -83,46 +98,41 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
-        // JavaScript: The Muscle & Logic
-
         // 1. Initialize the map (Default view over India)
         var map = L.map('map').setView([20.5937, 78.9629], 5);
 
-        // 2. Load the free OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // 2. Load CartoDB Dark Matter tiles (Dark Stealth Theme)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
-            attribution: '© OpenStreetMap'
+            attribution: '© OpenStreetMap contributors, © CARTO'
         }).addTo(map);
 
         var emergencyMarker;
 
         // 3. The Function to trigger the visual alert
         function triggerEmergency(lat, lng) {
-            // Show the blinking red banner
             document.getElementById('alert-banner').style.display = 'block';
-            
-            // Update the text with actual coordinates
             document.getElementById('coords-text').innerText = "Live Location: " + lat + "° N, " + lng + "° E";
-
-            // Fly the map to the specific coordinates with a cool animation
+            
             map.flyTo([lat, lng], 16);
 
-            // Remove old marker if it exists, and drop a new red marker
             if(emergencyMarker) { map.removeLayer(emergencyMarker); }
             
-            // Draw a precise, solid red dot directly on the coordinates
-            emergencyMarker = L.circleMarker([lat, lng], {
-                color: 'darkred',   // Outer ring color
-                fillColor: 'red',   // Inner dot color
-                fillOpacity: 1.0,   // Makes the dot solid
-                radius: 10          // Size of the red dot
-            }).addTo(map)
-            .bindPopup("<b>🎯 SPANDA Beacon Pinpointed!</b>").openPopup();
+            // 4. Attach the blinking CSS class to a custom map icon
+            var blinkingIcon = L.divIcon({
+                className: 'blinking-dot',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8], // Centers the dot exactly on the coordinates
+                popupAnchor: [0, -10]
+            });
+
+            // 5. Drop the blinking marker on the map
+            emergencyMarker = L.marker([lat, lng], {icon: blinkingIcon}).addTo(map)
+                .bindPopup("<b>🎯 SPANDA Beacon Pinpointed!</b>").openPopup();
         }
 
-        // 4. Test Function (Simulates the SIM800L sending coordinates)
+        // Test Function (Simulates the SIM800L sending coordinates)
         function testEmergency() {
-            // Simulating a coordinate drop in Dehradun
             triggerEmergency(30.3165, 78.0322);
         }
     </script>
