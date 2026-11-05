@@ -71,6 +71,28 @@
             100% { opacity: 0; transform: scale(1.5); }
         }
 
+/* CONTINUOUSLY BLINKING MAP DOT CSS */
+        .blinking-dot {
+            background-color: #ff0000;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 1);
+            animation: dot-blink 0.6s infinite alternate;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+
+        @keyframes dot-blink {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
+
+
+        
+
         /* Developer Test Button */
         .test-btn {
             background-color: #007bff;
@@ -137,7 +159,27 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
         // Test Function (Simulates the SIM800L sending coordinates)
         function testEmergency() {
-            triggerEmergency(30.3165, 78.0322);
+            function triggerEmergency(lat, lng) {
+            document.getElementById('alert-banner').style.display = 'block';
+            document.getElementById('coords-text').innerText = "Live Location: " + lat + "° N, " + lng + "° E";
+            
+            map.flyTo([lat, lng], 16);
+
+            if(emergencyMarker) { map.removeLayer(emergencyMarker); }
+            
+            // Use an empty className and custom html to perfectly align the dot
+            var blinkingIcon = L.divIcon({
+                className: '', 
+                html: '<div class="blinking-dot"></div>',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8], // Perfectly centers the 16px dot
+                popupAnchor: [0, -10] // Hovers the popup just above the dot
+            });
+
+            // Drop the marker and update the popup text to STEALTH
+            emergencyMarker = L.marker([lat, lng], {icon: blinkingIcon}).addTo(map)
+                .bindPopup("<b>🎯 STEALTH Beacon Pinpointed!</b>").openPopup();
+        }
         }
     </script>
 </body>
